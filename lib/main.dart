@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import './screens/ChatScreen.dart';
+import './screens/AuthScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +18,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Converse',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.pink,
+        backgroundColor: Colors.grey.shade500,
+        canvasColor: Colors.teal.shade300,
       ),
-      home: ChatScreen(),
+      home: AuthScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
