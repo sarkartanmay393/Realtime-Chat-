@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "671213478521",
+    "project_id": "flutterconverse",
+    "storage_bucket": "flutterconverse.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671213478521:android:20bde9459db6f0ddc42aa8",
+        "android_client_info": {
+          "package_name": "com.example.flutter_converse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671213478521-c2e90h3d1em81clopp0gfhap8i37aan2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9ou5eTujc1ZB-cmagcorkb4fnH_D7nSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671213478521-c2e90h3d1em81clopp0gfhap8i37aan2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
