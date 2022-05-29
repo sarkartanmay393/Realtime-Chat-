@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -20,9 +21,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.pink,
         backgroundColor: Colors.grey.shade500,
-        canvasColor: Colors.teal.shade300,
+        canvasColor: Color.fromARGB(255, 248, 249, 249),
       ),
-      home: AuthScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (ctx, ss) {
+          if (ss.hasData) {
+            return ChatScreen();
+          }
+          return AuthScreen();
+        },
+      ),
+      routes: {
+        ChatScreen.routeName: (context) => ChatScreen(),
+        AuthScreen.routeName: (context) => AuthScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

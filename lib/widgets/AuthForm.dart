@@ -6,8 +6,11 @@ enum AuthMode {
 }
 
 class AuthForm extends StatefulWidget {
-  const AuthForm({Key? key}) : super(key: key);
+  final Function sumbitForm;
 
+  AuthForm(this.sumbitForm, {Key? key}) : super(key: key);
+
+  static var isLoading = false;
   @override
   State<AuthForm> createState() => _AuthFormState();
 }
@@ -15,7 +18,6 @@ class AuthForm extends StatefulWidget {
 class _AuthFormState extends State<AuthForm> {
   AuthMode CurrentMode = AuthMode.Login;
   final _formKey = GlobalKey<FormState>();
-  var firstAppBuild = true;
 
   void mode_switcher() {
     if (CurrentMode == AuthMode.Login) {
@@ -26,14 +28,51 @@ class _AuthFormState extends State<AuthForm> {
     } else {
       setState(() {
         CurrentMode = AuthMode.Login;
-        animatedContainerHeight = 300;
+        animatedContainerHeight = 235;
       });
     }
   }
 
-  void submitter() {}
+  void submitter() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
+    setState(() {
+      AuthForm.isLoading = true;
+    });
+    FocusScope.of(context).unfocus();
 
-  double animatedContainerHeight = 300;
+    if (CurrentMode == AuthMode.Login) {
+      widget.sumbitForm(
+        email: Data['email']!,
+        password: Data['password']!,
+        ctx: context,
+        isLogin: true,
+        username: null,
+      );
+    } else {
+      widget.sumbitForm(
+        email: createData['email']!,
+        password: createData['password']!,
+        ctx: context,
+        isLogin: false,
+        username: createData['username']!,
+      );
+    }
+  }
+
+  static Map<String, String> Data = {
+    'email': '',
+    'password': '',
+  };
+  static Map<String, String> createData = {
+    'email': '',
+    'password': '',
+    'username': '',
+  };
+
+  double animatedContainerHeight = 235;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +83,7 @@ class _AuthFormState extends State<AuthForm> {
         ),
         child: AnimatedContainer(
           duration: const Duration(
-            milliseconds: 1000,
+            milliseconds: 500,
           ),
           curve: Curves.decelerate,
           height: animatedContainerHeight,
@@ -72,8 +111,7 @@ class _LoginForm extends StatelessWidget {
   final Mode_Switcher;
   final submit;
 
-  const _LoginForm(this.Mode_Switcher, this.submit, {Key? key})
-      : super(key: key);
+  _LoginForm(this.Mode_Switcher, this.submit, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -81,13 +119,34 @@ class _LoginForm extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         TextFormField(
+          validator: (input) {
+            if (input!.isEmpty) {
+              return 'Enter Email.';
+            }
+            if (!(input.contains('@') && input.contains('.'))) {
+              return 'Enter Valid Email.';
+            }
+            return null;
+          },
+          onSaved: (input) {
+            _AuthFormState.Data['email'] = input.toString();
+          },
           decoration: const InputDecoration(labelText: "Email Address"),
           keyboardType: TextInputType.emailAddress,
         ),
         TextFormField(
-          decoration: const InputDecoration(labelText: "Username"),
-        ),
-        TextFormField(
+          validator: (input) {
+            if (input!.isEmpty) {
+              return 'Enter Password.';
+            }
+            if (!(input.length >= 7)) {
+              return 'Minimum Length is 7.';
+            }
+            return null;
+          },
+          onSaved: (input) {
+            _AuthFormState.Data['password'] = input.toString();
+          },
           decoration: const InputDecoration(labelText: "Password"),
           obscureText: true,
         ),
@@ -103,7 +162,16 @@ class _LoginForm extends StatelessWidget {
               ),
             ),
           ),
-          child: const Text("Login"),
+          child: AuthForm.isLoading
+              ? const SizedBox(
+                  height: 12,
+                  width: 12,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text("Login"),
         ),
         TextButton(
           onPressed: Mode_Switcher,
@@ -118,8 +186,9 @@ class _SignupForm extends StatelessWidget {
   final Mode_Switcher;
   final submit;
 
-  const _SignupForm(this.Mode_Switcher, this.submit, {Key? key})
-      : super(key: key);
+  _SignupForm(this.Mode_Switcher, this.submit, {Key? key}) : super(key: key);
+
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -130,24 +199,73 @@ class _SignupForm extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircleAvatar(
-            minRadius: 46,
+            minRadius: 47,
           ),
           TextButton(
             onPressed: () {},
             child: const Text('Pick Image'),
           ),
           TextFormField(
+            validator: (input) {
+              if (input!.isEmpty) {
+                return 'Enter Email.';
+              }
+              if (!(input.contains('@') && input.contains('.'))) {
+                return 'Enter Valid Email.';
+              }
+              return null;
+            },
+            onSaved: (input) {
+              _AuthFormState.createData['email'] = input.toString();
+            },
             decoration: const InputDecoration(labelText: "Email Address"),
             keyboardType: TextInputType.emailAddress,
           ),
           TextFormField(
+            validator: (input) {
+              if (input!.isEmpty) {
+                return 'Enter Username.';
+              }
+              if (!(input.length >= 4)) {
+                return 'Enter Valid Username.';
+              }
+              return null;
+            },
+            onSaved: (input) {
+              _AuthFormState.createData['username'] = input.toString();
+            },
             decoration: const InputDecoration(labelText: "Username"),
           ),
           TextFormField(
+            validator: (input) {
+              if (input!.isEmpty) {
+                return 'Enter Password.';
+              }
+              if (!(input.length >= 7)) {
+                return 'Minimum Length is 7.';
+              }
+              return null;
+            },
+            controller: _passwordController,
             decoration: const InputDecoration(labelText: "Password"),
             obscureText: true,
           ),
           TextFormField(
+            validator: (input) {
+              if (input!.isEmpty) {
+                return 'Enter Password.';
+              }
+              if (!(input.length >= 7)) {
+                return 'Minimum Length is 7.';
+              }
+              if (_passwordController.text != input) {
+                return "Password isn't Matching";
+              }
+              return null;
+            },
+            onSaved: (input) {
+              _AuthFormState.createData['password'] = input.toString();
+            },
             decoration: const InputDecoration(labelText: "Confirm Password"),
             obscureText: true,
           ),
@@ -163,7 +281,16 @@ class _SignupForm extends StatelessWidget {
                 ),
               ),
             ),
-            child: const Text("Create"),
+            child: AuthForm.isLoading
+                ? const SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text("Create"),
           ),
           const SizedBox(
             height: 12,
