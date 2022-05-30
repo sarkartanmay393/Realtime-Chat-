@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +23,7 @@ class _AuthScreenState extends State<AuthScreen> {
   void submitForm({
     required String email,
     String? username,
+    File? image,
     required String password,
     required bool isLogin,
     required BuildContext ctx,
@@ -31,18 +36,22 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
-        Navigator.of(context).pushNamed(ChatScreen.routeName);
-      } else {
+      } else if (image != null) {
         authResult = await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+        final ref =
+            FirebaseStorage.instance.ref().child('userImage/$username.jpg');
+        await ref.putFile(image).then((p0) => print(p0.metadata?.fullPath));
+        final imageUrl = await ref.getDownloadURL();
         FirebaseFirestore.instance
             .collection('users')
             .doc(authResult.user!.uid)
             .set({
           'username': username,
           'email': email,
+          'imageUrl': imageUrl,
         });
       }
       setState(() {
@@ -75,30 +84,31 @@ class _AuthScreenState extends State<AuthScreen> {
     // print(email + password + isLogin.toString() + username!);
   }
 
-  // var _isLoading = false;
+  var _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 1,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // const Padding(
-          //   padding: EdgeInsets.all(14.0),
-          //   child: Text(
-          //     'CONVERSE',
-          //     style: TextStyle(
-          //       fontSize: 32,
-          //       fontWeight: FontWeight.bold,
-          //       color: Color.fromARGB(255, 255, 255, 255),
-          //       //backgroundColor: Colors.pink,
-          //       decoration: TextDecoration.overline,
-          //     ),
-          //   ),
-          // ),
+          const Text(
+            'CONVERSE',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Colors.pinkAccent,
+              //backgroundColor: Colors.pink,
+              decoration: TextDecoration.overline,
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
           AuthForm(submitForm),
         ],
       ),

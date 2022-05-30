@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_converse/widgets/MessageBubble.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+import '../widgets/MessageBubble.dart';
 
 class ChatScreen extends StatelessWidget {
   static const routeName = 'ChatScreen';
@@ -16,12 +18,14 @@ class ChatScreen extends StatelessWidget {
 
   void _sendMessage(BuildContext ctx) async {
     String ownUsername = '';
+    String imageUrl = '';
     await FirebaseFirestore.instance
         .collection("users")
         .doc(uid)
         .get()
         .then((value) {
       ownUsername = value.data()!['username'];
+      imageUrl = value.data()!['imageUrl'];
     });
     _messageController.text.isEmpty
         ? null
@@ -32,6 +36,7 @@ class ChatScreen extends StatelessWidget {
             'time': Timestamp.now(),
             'userId': uid,
             'username': ownUsername,
+            'imageUrl': imageUrl,
           });
     _messageController.clear();
     FocusScope.of(ctx).unfocus();
@@ -98,9 +103,11 @@ class ChatScreen extends StatelessWidget {
                         final message = ss.data!.docs[i]['text'];
                         final time = ss.data!.docs[i]['time'] as Timestamp;
                         final username = ss.data!.docs[i]['username'];
+                        final imageUrl = ss.data!.docs[i]['imageUrl'];
                         key:
                         ValueKey(ss.data!.docs[i].id);
-                        return MessageBubble(message, time, isMe, username);
+                        return MessageBubble(
+                            message, time, isMe, username, imageUrl);
                       },
                       itemCount: ss.data!.docs.length,
                     ),

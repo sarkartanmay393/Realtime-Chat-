@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 enum AuthMode {
   Login,
@@ -33,7 +36,7 @@ class _AuthFormState extends State<AuthForm> {
     }
   }
 
-  void submitter() {
+  void submitter(File? image) {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -43,6 +46,18 @@ class _AuthFormState extends State<AuthForm> {
     });
     FocusScope.of(context).unfocus();
 
+    if (CurrentMode == AuthMode.Signup && image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          "Select image to continue.",
+        ),
+      ));
+      setState(() {
+        AuthForm.isLoading = false;
+      });
+      return;
+    }
+
     if (CurrentMode == AuthMode.Login) {
       widget.sumbitForm(
         email: Data['email']!,
@@ -51,12 +66,13 @@ class _AuthFormState extends State<AuthForm> {
         isLogin: true,
         username: null,
       );
-    } else {
+    } else if (CurrentMode == AuthMode.Signup && image != null) {
       widget.sumbitForm(
         email: createData['email']!,
         password: createData['password']!,
         ctx: context,
         isLogin: false,
+        image: image,
         username: createData['username']!,
       );
     }
@@ -154,7 +170,7 @@ class _LoginForm extends StatelessWidget {
           height: 12,
         ),
         ElevatedButton(
-          onPressed: submit,
+          onPressed: () => submit(),
           style: ButtonStyle(
             shape: MaterialStateProperty.all(
               RoundedRectangleBorder(
@@ -182,28 +198,89 @@ class _LoginForm extends StatelessWidget {
   }
 }
 
-class _SignupForm extends StatelessWidget {
+class _SignupForm extends StatefulWidget {
   final Mode_Switcher;
   final submit;
 
   _SignupForm(this.Mode_Switcher, this.submit, {Key? key}) : super(key: key);
 
+  @override
+  State<_SignupForm> createState() => _SignupFormState();
+}
+
+class _SignupFormState extends State<_SignupForm> {
   final _passwordController = TextEditingController();
+
+  var image;
+  var ins = false;
+  final _picker = ImagePicker();
+
+  void imagepicking() async {
+    var img = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 600,
+      imageQuality: 85,
+    );
+
+    setState(() {
+      image = File(img!.path);
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _passwordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // var jk;
+    // FileImage jj = FileImage(image);
+    // NetworkImage kk = NetworkImage(
+    //     'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.wholesaleforeveryone.com%2Fproduct%2FHKSS0100_14_1895_0001.html&psig=AOvVaw0shq8HvV_Ji8CtffMCFuML&ust=1653932485918000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCPD6hOSghfgCFQAAAAAdAAAAABAD');
+    // if (ins) {
+    //   jk = jj;
+    // } else {
+    //   jk = kk;
+    // }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             minRadius: 47,
+            backgroundImage: image != null ? FileImage(image) : null,
           ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Pick Image'),
+          TextButton.icon(
+            onPressed: imagepicking,
+            // showDialog(
+            //   context: context,
+            //   builder: (ctx) {
+            //     return AlertDialog(
+            //         content: Container(
+            //       height: 120,
+            //       child: Column(
+            //         children: [
+            //           TextButton(
+            //             onPressed: () => imagepicking('camera'),
+            //             child: Text('Camera'),
+            //           ),
+            //           TextButton(
+            //             onPressed: () => imagepicking(' '),
+            //             child: Text('Gallery'),
+            //           ),
+            //         ],
+            //       ),
+            //     ));
+            //   },
+            // ),
+            label: const Text('Pick Image'),
+            icon: Icon(Icons.camera),
           ),
           TextFormField(
             validator: (input) {
@@ -273,7 +350,7 @@ class _SignupForm extends StatelessWidget {
             height: 12,
           ),
           ElevatedButton(
-            onPressed: submit,
+            onPressed: () => widget.submit(image),
             style: ButtonStyle(
               shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(
@@ -302,7 +379,7 @@ class _SignupForm extends StatelessWidget {
                 style: TextStyle(fontSize: 14),
               ),
               TextButton(
-                onPressed: Mode_Switcher,
+                onPressed: widget.Mode_Switcher,
                 style: const ButtonStyle(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),

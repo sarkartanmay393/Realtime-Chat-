@@ -14,11 +14,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Converse',
       theme: ThemeData(
+        // useMaterial3: true,
         primarySwatch: Colors.pink,
         backgroundColor: Colors.grey.shade500,
         canvasColor: Color.fromARGB(255, 248, 249, 249),

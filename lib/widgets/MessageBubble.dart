@@ -6,7 +6,9 @@ class MessageBubble extends StatelessWidget {
   final Timestamp timestamp;
   final bool isMe;
   final String username;
-  const MessageBubble(this.message, this.timestamp, this.isMe, this.username,
+  final String imageUrl;
+  const MessageBubble(
+      this.message, this.timestamp, this.isMe, this.username, this.imageUrl,
       {Key? key})
       : super(key: key);
 
@@ -34,39 +36,40 @@ class MessageBubble extends StatelessWidget {
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
-                  bottomLeft: isMe ? Radius.circular(0) : Radius.circular(16),
-                  bottomRight: !isMe ? Radius.circular(0) : Radius.circular(16),
+                  bottomLeft: isMe ? Radius.circular(4) : Radius.circular(16),
+                  bottomRight: !isMe ? Radius.circular(2) : Radius.circular(16),
                 ),
                 color: isMe ? Colors.grey[300] : Colors.deepPurple,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  isMe
-                      ? Container()
-                      : Text(
-                          '- $username',
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
+                  if (!isMe)
+                    Text(
+                      '- $username',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                      ),
+                    ),
                   const SizedBox(
-                    height: 2,
+                    height: 4,
                   ),
-                  isMe
-                      ? Text(
-                          message,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w400),
-                          textAlign: isMe ? TextAlign.end : TextAlign.start,
-                        )
-                      : Text(
-                          message,
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                          textAlign: isMe ? TextAlign.end : TextAlign.start,
-                        ),
+                  if (isMe)
+                    Text(
+                      message,
+                      style: const TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.w400),
+                      //textAlign: isMe ? TextAlign.end : TextAlign.start,
+                    )
+                  else
+                    Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                      textAlign: isMe ? TextAlign.end : TextAlign.start,
+                    ),
                   const SizedBox(
                     height: 5,
                   ),
@@ -92,13 +95,15 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
-            // !isMe
-            //     ? const CircleAvatar(
-            //         maxRadius: 14,
-            //         backgroundImage: NetworkImage(
-            //             "https://yt3.ggpht.com/ytc/AKedOLQzHgQRN1lq-wqm_Zv91kgtZbSEK3JPJM7vU0obkTg=s600-c-k-c0x00ffffff-no-rj-rp-mo"),
-            //       )
-            //     : const CircleAvatar(radius: 0),
+            if (!isMe)
+              Positioned(
+                left: 3,
+                top: 1,
+                child: CircleAvatar(
+                  maxRadius: 18,
+                  backgroundImage: NetworkImage(imageUrl),
+                ),
+              ),
           ],
           //alignment: AlignmentDirectional.topEnd,
         ),
